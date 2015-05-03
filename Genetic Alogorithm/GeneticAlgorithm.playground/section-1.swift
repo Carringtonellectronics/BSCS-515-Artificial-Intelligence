@@ -16,7 +16,7 @@ extension Array {
         }
         return list
     }
-
+    
 }
 
 public class City : NSObject {
@@ -26,14 +26,24 @@ public class City : NSObject {
     
     // Construct a city at chosen x, y location
     init(x:Int, y:Int){
+//        self.x = Int(arc4random() % 200)
+//        self.y = Int(arc4random() % 200)
+        self.x = x
+        self.y = y
+    }
+    
+    override init(){
         self.x = Int(arc4random() % 200)
         self.y = Int(arc4random() % 200)
+        //self.x = x
+        //self.y = y
     }
+
     
     //Gets the distance to given city
     public func distanceTo(city:City) -> Double {
-        let xDistance = self.x - city.x
-        let yDistance = self.y - city.y
+        let xDistance = abs(self.x - city.x)
+        let yDistance = abs(self.y - city.y)
         
         let distance:Double = sqrt(Double( (xDistance * xDistance) + (yDistance * yDistance) ))
         
@@ -46,36 +56,31 @@ public class City : NSObject {
     
 }
 
-
 public class TourManager {
     
     // Holds our cities
-    class var destinationCities:[City] {
-        get{
-            return self.destinationCities
-        }set{
-            self.destinationCities = newValue
-        }
-    }
+    var destinationCities:[City] = [City]()
     
     // Adds a destination city
-    public class func addCity(#city: City) {
+    public func addCity(#city: City) {
         destinationCities.append(city)
     }
     
     // Get a city
-    public class func getCity(index: Int) -> City {
+    public func getCity(index: Int) -> City {
         return destinationCities[index]
     }
     
     // Get the number of destination cities
-    public class func numberOfCities() -> Int {
+    public func numberOfCities() -> Int {
         return destinationCities.count
     }
     
 }
 
-public class Tour {
+var t = TourManager()
+
+public class Tour : NSObject {
     
     // Holds our tour of cities
     private(set) var tour:[City]
@@ -84,7 +89,7 @@ public class Tour {
     private(set) var fitness:Double = 0
     private(set) var distance:Int = 0
     
-    init(){
+    override init(){
         tour = [City]()
     }
     
@@ -93,8 +98,8 @@ public class Tour {
     }
     
     public func generateIndividual(){
-        for var cityIndex:Int = 0; cityIndex < TourManager.numberOfCities(); cityIndex++ {
-            setCity(tourPosition: cityIndex, city: TourManager.getCity(cityIndex))
+        for var cityIndex:Int = 0; cityIndex < t.numberOfCities(); cityIndex++ {
+            setCity(tourPosition: cityIndex, city: t.getCity(cityIndex))
         }
         //Ramdomly order the tour
         tour = tour.shuffled()
@@ -173,11 +178,10 @@ public class Tour {
 
 public class Population {
     // Holds population of tours
-    var tours:[Tour]
+    var tours:[Tour] = [Tour]()
     
     // Constructor
     init(initialize:Bool){
-        tours = [Tour]()
         
         //if we need to initialize a population of tours do so
         for var i = 0; i < populationSize(); i++ {
@@ -189,22 +193,25 @@ public class Population {
     
     //Saves a tour
     public func saveTour(index:Int, tour:Tour){
-        tours[index] = tour
+        //tours[index] = tour
+        tours.insert(tour, atIndex: index)
     }
     
     //Gets population size
     public func populationSize() -> Int{
-        return tours.count
+        return 2
     }
     
     //Gets the best tour in the population
-    public func getFittest() -> Tour{
+    public func getFittest() -> Tour {
+        
         var fittest = tours[0]
         
+        // exectution was interrupted, reason: EXC_BAD_INSTRUCTION
         //Loop through individuals to find fittest
         for var i:Int = 1; i < populationSize(); i++ {
             if fittest.getFitness() <= getTour(i).getFitness() {
-                fittest = getTour(i)
+                fittest = getTour(i-1)
             }
         }
         return fittest
@@ -212,12 +219,103 @@ public class Population {
     
     //Gets a tour from population
     public func getTour(index:Int) -> Tour {
+        println(index)
         return tours[index]
     }
 }
 
+public class GineticAlgorithm {
+    
+    class var mutationRate:Double {
+        get{
+        return 0.015
+        }
+    }
+    class var tournamentSize:Int {
+        get{
+            return 5
+        }
+    }
+    class var elitism:Bool {
+        get{
+            return true
+        }
+    }
+
+    //Evolves a population over one generation
+    class func evolvePopulation(pop: Population) -> Population {
+        
+        var newPopulation = Population(initialize: false)
+        
+        //Keep our best indivisual if elitism is enabled
+        var elitismOffset:Int = 0
+        
+        if elitism {
+            newPopulation.saveTour(0, tour: pop.getFittest())
+            elitismOffset = 1
+        }
+        
+        //Crossover population
+        //Loop over the new populations size and create indivisuals from current population
+        for var i:Int = elitismOffset; i < newPopulation.populationSize(); i++ {
+            //Select Parents
+            var parent1 = tournamentSelection(pop)
+            var parent2 = tournamentSelection(pop)
+            
+            //Crossover Parents
+            //let child = cro
+        }
+        return newPopulation
+
+    }
+    
+    class func tournamentSelection(pop:Population) -> Tour {
+        //Create a tournament population
+        var tournament = Population(initialize: false)
+        
+        for var i:Int = 0; i < tournamentSize; i++ {
+            var ranId = Int(arc4random() % UInt32(pop.populationSize()))
+            tournament.saveTour(i, tour: pop.getTour(ranId))
+        }
+        
+        //Get the fittest tour
+        var fittest = tournament.getFittest()
+        return fittest
+    }
+    
+}
+
+public class TSP_GineticAlgorithm {
+    
+    //Create and add our cities
+    
+    
+}
+
+var city1 = City(x: 560,y: 200)
+t.addCity(city: city1)
+var city2 = City()
+t.addCity(city: city2)
+var city3 = City()
+t.addCity(city: city3)
+var city4 = City()
+t.addCity(city: city4)
+t.addCity(city: City())
+t.addCity(city: City())
+t.addCity(city: City())
 
 
 
+//Initialize Population
+var pop = Population(initialize: true)
 
+//println("Initial Distance \(pop.getFittest().getDistance())")
 
+//Evolve population for 100 generations
+pop = GineticAlgorithm.evolvePopulation(pop)
+for var i:Int = 0; i < 5; i++ {
+    pop = GineticAlgorithm.evolvePopulation(pop)
+}
+
+println("FINAL DISTANCE = \(pop.getFittest().getDistance())")
+println("SOLUTION: \(pop.getFittest())")
