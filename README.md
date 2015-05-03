@@ -1,6 +1,6 @@
 ## BSCS-515-Artificial-Intelligence
 
-#BSCS III - A Morning (B12)
+Batch: BSCS III - A Morning (B12)
 
 Course Incharge: Dr. Tehseen Jilani
 Lab Assistant: Mr. Usman Amjad
