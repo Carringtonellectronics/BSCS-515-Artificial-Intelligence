@@ -171,7 +171,50 @@ public class Tour {
     
 }
 
-
+public class Population {
+    // Holds population of tours
+    var tours:[Tour]
+    
+    // Constructor
+    init(initialize:Bool){
+        tours = [Tour]()
+        
+        //if we need to initialize a population of tours do so
+        for var i = 0; i < populationSize(); i++ {
+            var newTour = Tour()
+            newTour.generateIndividual()
+            saveTour(i, tour: newTour)
+        }
+    }
+    
+    //Saves a tour
+    public func saveTour(index:Int, tour:Tour){
+        tours[index] = tour
+    }
+    
+    //Gets population size
+    public func populationSize() -> Int{
+        return tours.count
+    }
+    
+    //Gets the best tour in the population
+    public func getFittest() -> Tour{
+        var fittest = tours[0]
+        
+        //Loop through individuals to find fittest
+        for var i:Int = 1; i < populationSize(); i++ {
+            if fittest.getFitness() <= getTour(i).getFitness() {
+                fittest = getTour(i)
+            }
+        }
+        return fittest
+    }
+    
+    //Gets a tour from population
+    public func getTour(index:Int) -> Tour {
+        return tours[index]
+    }
+}
 
 
 
