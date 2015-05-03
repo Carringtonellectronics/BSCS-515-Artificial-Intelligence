@@ -5,7 +5,7 @@ Batch: BSCS III - A Morning (B12)
 
 Course Incharge: **Dr. Tehseen Jilani**
 
-Lab Assistant: **Mr. Usman Amjad**
+Lab Incharge: **Mr. Usman Amjad**
 
 
 Department of Computer Science (UBIT), University of Karachi
