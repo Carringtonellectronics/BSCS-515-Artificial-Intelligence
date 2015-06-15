@@ -95,7 +95,7 @@ public struct Score<Individual:IndividualType>:Printable {
 }
 
 //stats regarding current state of evolution
-public struct IterationData<I:IndividualType> : Printable {
+public struct IterationData<I : IndividualType> : Printable {
     init(iterationNum: Int, pop:[Score<I>], fitnessKind: FitnessKind, config: Configuration){
         self.iterationNum = iterationNum
         
@@ -186,4 +186,110 @@ public func evaluatePopulation<I:IndividualType>(population:[I], withStride stri
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
     
     return scores
+}
+
+//sort the evaluated population by fitness kind
+public func sortEvaluatedPopulation<I:IndividualType>(population: [Score<I>], fitnessKind:FitnessKind) -> [Score<I>] {
+    let sorted = population.sorted{ return fitnessKind.comparsionOp(lhs: $0.fitness, rhs: $1.fitness) }
+    
+    let fitnesses = population.map { $0.fitness }
+    
+    return sorted
+}
+
+//A Simple generational genetic engine implementation
+public class SimpleEngine<I:IndividualType> : Engine {
+    
+    //MARK: Engune
+    
+    typealias Individual = I
+    
+    typealias Factory = () -> Individual
+    
+    typealias Population = [Individual]
+    typealias EvaluatedPopulation = [Score<Individual>]
+    
+    typealias Evaluation = (Individual, Population) -> Fitness
+    typealias Operator = Population -> Population
+    typealias Selection = (EvaluatedPopulation, FitnessKind, Int) -> Population
+    
+    typealias op:Operator
+    
+    public let factory:Factory
+    public let fitnessKind:FitnessKind
+    public let selection:Selection
+    public let op:Operator
+    
+    public let evaluation:Evaluation
+    public let termination:Termination?
+    public var iteration: (IterationData<Individual> -> Void)?
+    
+    public init(factor:Factory,
+        evaluation:Evaluation,
+        fitnessKind: FitnessKind,
+        selection:Selection,
+        op: Operator) {
+            self.factory = factory
+            self.evaluation = evaluation
+            self.fitnessKind = fitnessKind
+            self.selection = selection
+            self.op = op
+            self.config = Configuration()
+    }
+    
+    public var config:Configuration
+    
+    public func evolve() -> Individual {
+        let pop = primordialSoup(self.config.size, self.factory)
+        
+        var evaluatedPop = evaluatePopulation(pop, withStride: 25, self.evaluation)
+        var sortedEvaluatedPop = sortEvaluatedPopulation(evaluatedPop, self.fitnessKind)
+        
+        var iterationIdx = 0
+        
+        var data = IterationData(iterationNum: iterationIdx, pop: sortedEvaluatedPop, fitnessKind: self.fitnessKind, config: self.config)
+        self.iteration?(data)
+        
+        while(self.termination == nil || self.termination!(data) == false) {
+            evaluatedPop = step(sortedEvaluatedPop)
+            sortedEvaluatedPop = sortEvaluatedPopulation(evaluatedPop, self.fitnessKind)
+            iterationIdx++
+            
+            data = IterationData(iterationNum: iterationIdx, pop: sortedEvaluatedPop, fitnessKind: self.fitnessKind, config:self.config)
+            self.iteration?(data)
+        }
+        return data.bestCandidate
+    }
+    
+    //Evolution iteration logic
+    func step(pop: EvaluatedPopulation) -> EvaluatedPopulation {
+        let elites = map(pop[0..<self.config.eliteCount]) {$0.individual}
+        
+        let normalCount = pop.count - elites.count
+        var selectedPop = self.selection(pop, self.fitnessKind, normalCount)
+        
+        //parametrize?
+        while selectedPop.count < normalCount {
+            selectedPop += Selections.Random(pop, fitnessKind: self.fitnessKind, count: normalCount - selectedPop.count)
+        }
+        
+        var mutatedPop = self.op(Array(selectedPop[0..<selectedPop.count]))
+        //parametrize?
+        while mutatedPop.count < normalCount {
+            mutatedPop.append(self.factory())
+        }
+        
+        let newPop = elites + mutatedPop
+        let newEvaluatedPop = evaluatePopulation(newPop, withStride: 25, self.evaluation)
+        
+        return newEvaluatedPop
+    }
+}
+
+//Simple Engine parametrization
+public struct Configuration {
+    public init() {}
+    
+    public var size = 250
+    public var eliteCount = 1
 }
