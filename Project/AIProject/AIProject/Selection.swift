@@ -88,4 +88,16 @@ public struct Selections {
         return selection
     }
     
+    public static func RankSelection<I : IndividualType>(pop: [Score<I>], fitnessKind: FitnessKind, count: Int) -> [I] {
+        let mappedPop = map(enumerate(pop)) { idx, score -> Score<I> in
+            return Score(fitness: self.rankMapped(idx+1, populationSize: pop.count), individual: score.individual)
+        }
+        
+        return StochasticUniversalSampling(mappedPop, fitnessKind: fitnessKind, count: count)
+    }
+    
+    private static func rankMapped(rank: Int, populationSize: Int) -> Double {
+        return Double(populationSize - rank)
+    }
+    
 }
