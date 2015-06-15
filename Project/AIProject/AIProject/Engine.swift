@@ -84,4 +84,106 @@ public struct Score<Individual:IndividualType>:Printable {
     public var description:String {
         return "\(self.individual):\(self.fitness)"
     }
+    
+    func fitterIndividual(fitnessKind:FitnessKind, other: Score<Individual>) -> Individual {
+        if fitnessKind.comparsionOp(lhs: self.fitness, rhs: other.fitness){
+            return self.individual
+        }else{
+            return other.individual
+        }
+    }
+}
+
+//stats regarding current state of evolution
+public struct IterationData<I:IndividualType> : Printable {
+    init(iterationNum: Int, pop:[Score<I>], fitnessKind: FitnessKind, config: Configuration){
+        self.iterationNum = iterationNum
+        
+        let bestScore = pop.first!
+        
+        self.bestCandidate = bestScore.individual
+        self.bestCandidateFitness = bestScore.fitness
+        
+        let stats = Stats(pop.map { $0.fitness } )
+        
+        self.fitnessMean = stats.airthmeticMean
+        self.fitnesstStandardDeviation = stats.standardDeviation
+        
+        self.fitnessKind = fitnessKind
+    }
+    
+    public let iterationNum:Int
+    
+    public let bestCandidate:I
+    public let bestCandidateFitness:Fitness
+    
+    public let fitnessMean:Fitness
+    
+    public var description:String {
+        return "--\(iterationNum) : \(bestCandidate)"
+    }
+}
+
+/*"Primordial soup" is a term introduced by the Soviet biologist Alexander Oparin. In 1924, he proposed a theory of the origin of life on Earth through the transformation, during the gradual chemical evolution of molecules that contain carbon in the primordial soup.
+
+Biochemist Robert Shapiro has summarized the "primordial soup" theory of Oparin and Haldane in its "mature form" as follows:[1]
+
+Early Earth had a chemically reducing atmosphere.
+This atmosphere, exposed to energy in various forms, produced simple organic compounds ("monomers").
+These compounds accumulated in a "soup", which may have been concentrated at various locations (shorelines, oceanic vents etc.).
+By further transformation, more complex organic polymers – and ultimately life – developed in the soup.*/
+//from Wikipedia
+public func primordialSoup<I:IndividualType>(size: Int, factory:()->) -> [I] {
+    return (0..<size).map({ _ -> in
+        factory()
+    })
+}
+
+//
+//stride: http://www.sdsc.edu/~allans/pap255.pdf : meaning :cross (an obstacle) with one long step.
+public func evaluatePopulation<I:IndividualType>(population:[I], withStride stride:Int, evaluation:(I,[I]) -> Fitness) -> [Score<I>] {
+    
+    //threading
+    let queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
+    
+    var scores = [Score<I>]()
+    scores.reserveCapacity(population.count)
+    
+    let writeQueue = dispatch_queue_create("scores write queue", DISPATCH_QUEUE_SERIAL)
+    
+    let group = dispatch_group_create()
+    
+    let iterations = Int(population.count/stride)
+    func evaluatePopulationClosure(idx:Int) -> (Void) {
+        var j = Int(idx) * stride
+        var jStop = j + stride
+        
+        for i in j..<jStop {
+            dispatch_group_enter(group)
+            let indivi = population[i]
+            let fitness = evaluation(indivi, population)
+            
+            dispatch_async(writeQueue){
+                scores.append((Score(fitness: fitness, individual: indivi)))
+                dispatch_group_leave(group)
+            }
+        }
+    }
+    dispatch_apply(iterations, queue, evaluatePopulationClosure)
+    //handle remainder
+    dispatch_group_enter(group)
+    dispatch_async(queue) {
+        let startIdx = Int(iterations) * stride
+        let remainder = lazy(population[startIdx..<population.count]).map { ind -> Score<I> in
+            return Score(fitness: evaluation(indivi, population), individual: indivi)
+        }
+        dispatch_async(writeQueue) {
+            scores.extend(remainder)
+            dispatch_group_leave(group)
+        }
+    }
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+    
+    return scores
 }
