@@ -15,6 +15,7 @@
 		75A11FD11B2F0DDF00910DF8 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 75A11FCF1B2F0DDF00910DF8 /* LaunchScreen.xib */; };
 		75A11FDD1B2F0DE000910DF8 /* AIProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A11FDC1B2F0DE000910DF8 /* AIProjectTests.swift */; };
 		75A11FE81B2F0F4C00910DF8 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A11FE71B2F0F4C00910DF8 /* Engine.swift */; };
+		75AF7E961B2F223600F508DE /* Selection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF7E951B2F223600F508DE /* Selection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 		75A11FDB1B2F0DE000910DF8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		75A11FDC1B2F0DE000910DF8 /* AIProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProjectTests.swift; sourceTree = "<group>"; };
 		75A11FE71B2F0F4C00910DF8 /* Engine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
+		75AF7E951B2F223600F508DE /* Selection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Selection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				75A11FE71B2F0F4C00910DF8 /* Engine.swift */,
+				75AF7E951B2F223600F508DE /* Selection.swift */,
 			);
 			name = GeneticAlgo;
 			sourceTree = "<group>";
@@ -227,6 +230,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75A11FC91B2F0DDF00910DF8 /* ViewController.swift in Sources */,
+				75AF7E961B2F223600F508DE /* Selection.swift in Sources */,
 				75A11FE81B2F0F4C00910DF8 /* Engine.swift in Sources */,
 				75A11FC41B2F0DDF00910DF8 /* AppDelegate.swift in Sources */,
 				75A11FC71B2F0DDF00910DF8 /* AIProject.xcdatamodeld in Sources */,
@@ -427,6 +431,7 @@
 				75A11FE21B2F0DE000910DF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		75A11FE31B2F0DE000910DF8 /* Build configuration list for PBXNativeTarget "AIProjectTests" */ = {
 			isa = XCConfigurationList;
@@ -435,6 +440,7 @@
 				75A11FE51B2F0DE000910DF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
