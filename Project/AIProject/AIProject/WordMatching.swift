@@ -22,7 +22,7 @@ class WordMatching {
     
     func doScience(target: String){
         let targetWord = String(filter(target.uppercaseString){ character in
-            let allASCII = reduce(String(character).unicodeScalars, true, { $0 && $1.value > 64 && $1.value < 90 })
+            let allASCII = reduce(String(character).unicodeScalars, true, { $0 && $1.value > 64 && $1.value < 91 })
             return allASCII
             })
         
@@ -85,10 +85,10 @@ extension String: Mutatable {
         let charScalar = Int(lazy(String(characters[from]).unicodeScalars).first!.value)
         
         var newChar = coinFlip() ? charScalar + 1 : charScalar - 1
-        if newChar > 89 {
+        if newChar > 90 {
             newChar = 0
         }else if newChar < 65 {
-            newChar = 89
+            newChar = 90
         }
         
         characters.replaceRange(Range(start:from, end:from+1), with:[Character(UnicodeScalar(newChar))])
@@ -145,7 +145,7 @@ func distanceFromTargetWord(targetWord: String)(word: String) -> Fitness {
 
 extension UnicodeScalar {
     static func arbitrary() -> UnicodeScalar {
-        return UnicodeScalar(65+arc4random_uniform(90-65))
+        return UnicodeScalar(65+arc4random_uniform(91-65))
     }
 }
 
