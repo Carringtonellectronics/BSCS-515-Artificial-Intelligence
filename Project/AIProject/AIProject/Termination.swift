@@ -18,7 +18,7 @@ public struct TerminationConditions {
     }
     
     public static func FitnessThreshold<I : IndividualType>(threshold: Fitness, fitnessKind: FitnessKind)(data:IterationData<I>) -> Bool {
-        return fitnessKind.comparisonOp(lhs: data.bestCandidateFitness, rhs: threshold)
+        return fitnessKind.comparsionOp(lhs: data.bestCandidateFitness, rhs: threshold)
     }
     
     public static func ReferenceIndividual<I : IndividualType where I : Comparable>(reference: I)(data:IterationData<I>) -> Bool {

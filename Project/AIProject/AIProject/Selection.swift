@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Foundation
 
 public struct Selections {
     public static func Truncation<I: IndividualType>(truncationPoint: Double)(pop:[Score<I>], fitnessKind: FitnessKind, count:Int) -> [I] {
@@ -85,6 +86,35 @@ public struct Selections {
             
             selection.append(pop[idx].individual)
         }
+        return selection
+    }
+    
+    //https://en.wikipedia.org/wiki/Stochastic_universal_sampling
+    public static func StochasticUniversalSampling<I:IndividualType>(pop: [Score<I>], fitnessKind: FitnessKind, count: Int) -> [I] {
+        let adjustedFitnesses = pop.map { score -> Fitness in
+            return fitnessKind.adjustedFitness(score.fitness)
+        }
+        
+        let sum = adjustedFitnesses.reduce(0, combine: (+))
+        
+        let startOffset = Double(random(from: 0.0, to: 1.0))
+        
+        var cumulativeExpectation: Double = 0
+        
+        var idx = 0
+        
+        var selection = [I]()
+        
+        for score in pop {
+            let adjusted = fitnessKind.adjustedFitness(score.fitness)
+            cumulativeExpectation += adjusted / sum * Double(count)
+            
+            while (cumulativeExpectation > startOffset + Double(idx)) {
+                selection.append(score.individual);
+                idx++;
+            }
+        }
+        
         return selection
     }
     

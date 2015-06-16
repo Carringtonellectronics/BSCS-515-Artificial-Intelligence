@@ -9,10 +9,11 @@
 
 import UIKit
 
-class Engine: NSObject {
-    
+//Types of individuals to be evolved have to conform to this type
+public protocol IndividualType {
 }
 
+//Genetic Engine
 public protocol Engine {
     //evolved
     typealias Individual:IndividualType
@@ -96,7 +97,7 @@ public struct Score<Individual:IndividualType>:Printable {
 
 //stats regarding current state of evolution
 public struct IterationData<I : IndividualType> : Printable {
-    init(iterationNum: Int, pop:[Score<I>], fitnessKind: FitnessKind, config: Configuration){
+    init(iterationNum: Int, pop:[Score<I>], fitnessKind: FitnessKind, config: Configuration) {
         self.iterationNum = iterationNum
         
         let bestScore = pop.first!
@@ -104,23 +105,26 @@ public struct IterationData<I : IndividualType> : Printable {
         self.bestCandidate = bestScore.individual
         self.bestCandidateFitness = bestScore.fitness
         
-        let stats = Stats(pop.map { $0.fitness } )
+        let stats = Stats(pop.map { $0.fitness })
         
         self.fitnessMean = stats.airthmeticMean
-        self.fitnesstStandardDeviation = stats.standardDeviation
+        self.fitnessStandardDev = stats.standardDeviation
         
         self.fitnessKind = fitnessKind
     }
     
-    public let iterationNum:Int
+    public let iterationNum: Int
     
-    public let bestCandidate:I
-    public let bestCandidateFitness:Fitness
+    public let bestCandidate: I
+    public let bestCandidateFitness: Fitness
     
-    public let fitnessMean:Fitness
+    public let fitnessMean: Fitness
+    public let fitnessStandardDev: Fitness
     
-    public var description:String {
-        return "--\(iterationNum) : \(bestCandidate)"
+    public let fitnessKind: FitnessKind
+    
+    public var description: String {
+        return "#\(iterationNum):\(bestCandidate)"
     }
 }
 
@@ -133,17 +137,16 @@ This atmosphere, exposed to energy in various forms, produced simple organic com
 These compounds accumulated in a "soup", which may have been concentrated at various locations (shorelines, oceanic vents etc.).
 By further transformation, more complex organic polymers – and ultimately life – developed in the soup.*/
 //from Wikipedia
-public func primordialSoup<I:IndividualType>(size: Int, factory:()->) -> [I] {
-    return (0..<size).map({ _ -> in
+
+public func primordialSoup<I : IndividualType>(size: Int, factory:()->I) -> [I] {
+    return (0..<size).map { _ -> I in
         factory()
-    })
+    }
 }
 
 //
 //stride: http://www.sdsc.edu/~allans/pap255.pdf : meaning :cross (an obstacle) with one long step.
-public func evaluatePopulation<I:IndividualType>(population:[I], withStride stride:Int, evaluation:(I,[I]) -> Fitness) -> [Score<I>] {
-    
-    //threading
+public func evaluatePopulation<I : IndividualType>(population: [I], withStride stride: Int, evaluation:(I, [I]) -> Fitness) -> [Score<I>] {
     let queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0)
     
     var scores = [Score<I>]()
@@ -153,29 +156,29 @@ public func evaluatePopulation<I:IndividualType>(population:[I], withStride stri
     
     let group = dispatch_group_create()
     
+    //TODO: write this in a more swifty way
     let iterations = Int(population.count/stride)
-    func evaluatePopulationClosure(idx:Int) -> (Void) {
+    func evaluatePopulationClosure(idx: Int) -> (Void) {
         var j = Int(idx) * stride
-        var jStop = j + stride
-        
-        for i in j..<jStop {
+        let j_stop = j + stride
+        do {
             dispatch_group_enter(group)
-            let indivi = population[i]
-            let fitness = evaluation(indivi, population)
-            
-            dispatch_async(writeQueue){
-                scores.append((Score(fitness: fitness, individual: indivi)))
+            let ind = population[j]
+            let fitness = evaluation(ind, population)
+            dispatch_async(writeQueue) {
+                scores.append(Score(fitness: fitness, individual: ind))
                 dispatch_group_leave(group)
             }
-        }
+            j++
+        } while (j < j_stop);
     }
     dispatch_apply(iterations, queue, evaluatePopulationClosure)
-    //handle remainder
+    //handle the remainder
     dispatch_group_enter(group)
     dispatch_async(queue) {
         let startIdx = Int(iterations) * stride
         let remainder = lazy(population[startIdx..<population.count]).map { ind -> Score<I> in
-            return Score(fitness: evaluation(indivi, population), individual: indivi)
+            return Score(fitness: evaluation(ind, population), individual: ind)
         }
         dispatch_async(writeQueue) {
             scores.extend(remainder)
@@ -198,9 +201,9 @@ public func sortEvaluatedPopulation<I:IndividualType>(population: [Score<I>], fi
 }
 
 //A Simple generational genetic engine implementation
-public class SimpleEngine<I:IndividualType> : Engine {
+public class SimpleEngine<I : IndividualType> : Engine {
     
-    //MARK: Engune
+    //MARK: Engine
     
     typealias Individual = I
     
@@ -213,21 +216,21 @@ public class SimpleEngine<I:IndividualType> : Engine {
     typealias Operator = Population -> Population
     typealias Selection = (EvaluatedPopulation, FitnessKind, Int) -> Population
     
-    typealias op:Operator
+    typealias Termination = IterationData<Individual> -> Bool
     
-    public let factory:Factory
+    public let factory: Factory
     public let fitnessKind:FitnessKind
     public let selection:Selection
     public let op:Operator
     
     public let evaluation:Evaluation
-    public let termination:Termination?
+    public var termination:Termination? = nil
     public var iteration: (IterationData<Individual> -> Void)?
     
-    public init(factor:Factory,
-        evaluation:Evaluation,
+    public init(factory: Factory,
+        evaluation: Evaluation,
         fitnessKind: FitnessKind,
-        selection:Selection,
+        selection: Selection,
         op: Operator) {
             self.factory = factory
             self.evaluation = evaluation
