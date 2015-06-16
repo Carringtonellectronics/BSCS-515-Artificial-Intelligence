@@ -22,6 +22,7 @@
 		75DB26A61B2FE58000FB57DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DB26A51B2FE58000FB57DE /* Utilities.swift */; };
 		75DB26A81B2FEC1500FB57DE /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DB26A71B2FEC1500FB57DE /* Operators.swift */; };
 		75DB26AA1B2FECC800FB57DE /* WordMatching.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DB26A91B2FECC800FB57DE /* WordMatching.swift */; };
+		75DB26AC1B30010600FB57DE /* wordMatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75DB26AB1B30010600FB57DE /* wordMatchViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		75DB26A51B2FE58000FB57DE /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		75DB26A71B2FEC1500FB57DE /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Operators.swift; sourceTree = "<group>"; };
 		75DB26A91B2FECC800FB57DE /* WordMatching.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordMatching.swift; sourceTree = "<group>"; };
+		75DB26AB1B30010600FB57DE /* wordMatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = wordMatchViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				75A11FC31B2F0DDF00910DF8 /* AppDelegate.swift */,
 				75A11FC81B2F0DDF00910DF8 /* ViewController.swift */,
 				75DB26A91B2FECC800FB57DE /* WordMatching.swift */,
+				75DB26AB1B30010600FB57DE /* wordMatchViewController.swift */,
 				75A11FCA1B2F0DDF00910DF8 /* Main.storyboard */,
 				75A11FCD1B2F0DDF00910DF8 /* Images.xcassets */,
 				75A11FCF1B2F0DDF00910DF8 /* LaunchScreen.xib */,
@@ -251,6 +254,7 @@
 				75DB26AA1B2FECC800FB57DE /* WordMatching.swift in Sources */,
 				75DB26A81B2FEC1500FB57DE /* Operators.swift in Sources */,
 				75AF7E961B2F223600F508DE /* Selection.swift in Sources */,
+				75DB26AC1B30010600FB57DE /* wordMatchViewController.swift in Sources */,
 				75DB26A41B2FE4C300FB57DE /* Dice.swift in Sources */,
 				75AF7E981B2F264100F508DE /* Termination.swift in Sources */,
 				75DB26A21B2FDF4000FB57DE /* Stats.swift in Sources */,
